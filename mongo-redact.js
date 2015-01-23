@@ -20,7 +20,7 @@ function redactValue(val) {
             return 999.123;
         }
     } else if (val instanceof NumberLong) {
-        return 999999;                
+        return new NumberLong(999999);
     } else if (typeof val == "string") {
         return "XXXXXXXX";
     } else if (val instanceof Date) {
