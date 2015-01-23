@@ -14,7 +14,11 @@
 
 function redactValue(val) {
     if (typeof val == "number") {
-        return 999;
+        if (val === (val|0)) {
+            return 999;
+        } else {
+            return 999.123;
+        }
     } else if (val instanceof NumberLong) {
         return 999999;                
     } else if (typeof val == "string") {

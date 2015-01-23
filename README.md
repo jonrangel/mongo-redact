@@ -4,8 +4,9 @@ Tools for redacting data.
 ## mongo-redact
 A simple MongoDB shell script to redact a document, removing potentially sensitive information while retaining the shape (_including field names_) of the document.
 
-- Ints and floats are replaced by 999
+- Ints are replaced by 999
 - Longs are replaced by 999999
+- Floats are replaced by 999.123
 - Strings are replaced by "XXXXXXXX"
 
 Usage:
