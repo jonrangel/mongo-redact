@@ -22,7 +22,11 @@ function redactValue(val) {
     } else if (val instanceof NumberLong) {
         return new NumberLong(999999);
     } else if (typeof val == "string") {
-        return "XXXXXXXX";
+        var s = "";
+        for (var i = 0; i < val.length; i++) {
+            s += "X";
+        }
+        return s;
     } else if (val instanceof Date) {
         // return the same date
     } else if (val instanceof ObjectId) {
