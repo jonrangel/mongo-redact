@@ -1,9 +1,11 @@
-// mongo-redact.js
-//
-// A mongo shell function to redact sensitive information while 
-// retaining the shape of the document.
-//
-// Jon Rangel, January 2015
+/*
+ * mongo-redact.js
+ *
+ * A mongo shell script to redact sensitive information
+ * read from MongoDB, while retaining the shape of the data.
+ *
+ * Copyright (c) 2015, Jon Rangel
+ */
 
 
 function redactValue(val) {
@@ -60,7 +62,9 @@ function printRedactedDoc(doc) {
 }
 
 
-// override DBQuery.prototype.next() method to allow for automatic redaction
+/*
+ * Override DBQuery.prototype.next() method to allow for automatic redaction.
+ */
 (function() {
     var re = /^\$cmd|^system/;
     var proxied = DBQuery.prototype.next;
@@ -74,7 +78,9 @@ function printRedactedDoc(doc) {
 })();
 
 
-// override DBCommandCursor.prototype.next() method to allow for automatic redaction
+/*
+ * Override DBCommandCursor.prototype.next() method to allow for automatic redaction.
+ */
 (function() {
     var proxied = DBCommandCursor.prototype.next;
     DBCommandCursor.prototype.next = function() {
@@ -87,12 +93,16 @@ function printRedactedDoc(doc) {
 })();
 
 
-// enable automatic redaction by default when this script is loaded
+/*
+ * Enable automatic redaction by default when this script is loaded.
+ */
 DBQuery.prototype._autoRedact = true;
 DBCommandCursor.prototype._autoRedact = true;
 
 
-// enable/disable automatic redaction globally
+/*
+ * Enable/disable automatic redaction globally.
+ */
 function setAutoRedaction(value) {
     if (value == undefined) value = true;
     DBQuery.prototype._autoRedact = value;
@@ -100,7 +110,9 @@ function setAutoRedaction(value) {
 }
 
 
-// enable/disable redaction on a per query basis
+/*
+ * Enable/disable redaction on a per query basis (for find()).
+ */
 DBQuery.prototype.redact = function(value) {
     if (value == undefined) value = true;
     this._autoRedact = value;
