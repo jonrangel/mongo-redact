@@ -6,12 +6,6 @@
 // Jon Rangel, January 2015
 
 
-// Note:
-// - ints and floats are replaced with 999
-// - longs are replaced with 999999
-// - strings are replaced with "XXXXXXXX"
-
-
 function redactValue(val) {
     if (typeof val == "number") {
         if (val === (val|0)) {
@@ -64,3 +58,51 @@ function redactDoc(doc) {
 function printRedactedDoc(doc) {
     printjson(redactDoc(doc));
 }
+
+
+// override DBQuery.prototype.next() method to allow for automatic redaction
+(function() {
+    var re = /^\$cmd|^system/;
+    var proxied = DBQuery.prototype.next;
+    DBQuery.prototype.next = function() {
+        var res = proxied.apply(this, arguments);
+        if (this._autoRedact && !this._collection.getName().match(re)) {
+            res = redactDoc(res);
+        }
+        return res;
+    };
+})();
+
+
+// override DBCommandCursor.prototype.next() method to allow for automatic redaction
+(function() {
+    var proxied = DBCommandCursor.prototype.next;
+    DBCommandCursor.prototype.next = function() {
+        var res = proxied.apply(this, arguments);
+        if (this._autoRedact) {
+            res = redactDoc(res);
+        }
+        return res;
+    };
+})();
+
+
+// enable automatic redaction by default when this script is loaded
+DBQuery.prototype._autoRedact = true;
+DBCommandCursor.prototype._autoRedact = true;
+
+
+// enable/disable automatic redaction globally
+function setAutoRedaction(value) {
+    if (value == undefined) value = true;
+    DBQuery.prototype._autoRedact = value;
+    DBCommandCursor.prototype._autoRedact = value;
+}
+
+
+// enable/disable redaction on a per query basis
+DBQuery.prototype.redact = function(value) {
+    if (value == undefined) value = true;
+    this._autoRedact = value;
+    return this;
+};
