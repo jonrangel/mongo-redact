@@ -10,46 +10,63 @@
 var Redact = (function() {
     "use strict";
 
-    function redactValue(val) {
+    function redactValue(val, level) {
+        if (level == undefined) level = 1;
+
         if (typeof val == "number") {
-            if (val === (val|0)) {
-                return 999;
+            if (level == 2) {
+                if (val === (val|0)) {
+                    return 999;
+                } else {
+                    return 999.123;
+                }
             } else {
-                return 999.123;
+                // return the same number
             }
         } else if (val instanceof NumberLong) {
-            return new NumberLong(999999);
-        } else if (typeof val == "string") {
-            var s = "";
-            for (var i = 0; i < val.length; i++) {
-                s += "X";
+            if (level == 2) {
+                return new NumberLong(999999);
+            } else {
+                // return the same number
             }
-            return s;
+        } else if (typeof val == "string") {
+            if (level == 2) {
+                var s = "";
+                for (var i = 0; i < val.length; i++) {
+                    s += "X";
+                }
+                return s;
+            } else {
+                // return MD5 hash of the string
+                return MD5Hash.hex_md5(val);
+            }
         } else if (val instanceof Date) {
             // return the same date
         } else if (val instanceof ObjectId) {
             // return the same Object ID
         } else if (val instanceof Array) {
-            return redactArray(val);
+            return redactArray(val, level);
         } else if (val instanceof Object) {
-            return redactDoc(val);
+            return redactDoc(val, level);
         }
 
         return val;
     }
 
-    function redactArray(arr) {
+    function redactArray(arr, level) {
+        if (level == undefined) level = 1;
         for (var i = 0; i < arr.length; i++) {
-            arr[i] = redactValue(arr[i]);
+            arr[i] = redactValue(arr[i], level);
         }
 
         return arr;
     }
 
-    function redactDoc(doc) {
+    function redactDoc(doc, level) {
+        if (level == undefined) level = 1;
         for (var prop in doc) {
             if (doc.hasOwnProperty(prop)) {
-                doc[prop] = redactValue(doc[prop]);
+                doc[prop] = redactValue(doc[prop], level);
             }
         }
 
@@ -68,8 +85,8 @@ var Redact = (function() {
         var proxied = DBQuery.prototype.next;
         DBQuery.prototype.next = function() {
             var res = proxied.apply(this, arguments);
-            if (this._autoRedact && !this._collection.getName().match(re)) {
-                res = redactDoc(res);
+            if (this._redactionLevel && !this._collection.getName().match(re)) {
+                res = redactDoc(res, this._redactionLevel);
             }
             return res;
         };
@@ -87,8 +104,8 @@ var Redact = (function() {
             var proxied = DBCommandCursor.prototype.next;
             DBCommandCursor.prototype.next = function() {
                 var res = proxied.apply(this, arguments);
-                if (this._autoRedact) {
-                    res = redactDoc(res);
+                if (this._redactionLevel) {
+                    res = redactDoc(res, this._redactionLevel);
                 }
                 return res;
             };
@@ -96,30 +113,32 @@ var Redact = (function() {
     }
 
     /*
-     * Enable automatic redaction by default when this script is loaded.
+     * Enable automatic redaction at level 1 by default when this script is loaded.
      */
-    DBQuery.prototype._autoRedact = true;
+    DBQuery.prototype._redactionLevel = 1;
     if (major > 2 || (major == 2 && minor >= 6)) {
-        DBCommandCursor.prototype._autoRedact = true;
+        DBCommandCursor.prototype._redactionLevel = 1;
     }
 
     /*
      * Enable/disable automatic redaction globally.
      */
-    function setAutoRedaction(value) {
-        if (value == undefined) value = true;
-        DBQuery.prototype._autoRedact = value;
+    function setRedactionLevel(level) {
+        if (level == undefined) level = true;
+        if (!(level === 0 || level === 1 || level === 2)) throw Error("redaction level must be 0, 1 or 2");
+        DBQuery.prototype._redactionLevel = level;
         if (major > 2 || (major == 2 && minor >= 6)) {
-            DBCommandCursor.prototype._autoRedact = value;
+            DBCommandCursor.prototype._redactionLevel = level;
         }
     }
 
     /*
      * Enable/disable redaction on a per query basis (for find()).
      */
-    DBQuery.prototype.redact = function(value) {
-        if (value == undefined) value = true;
-        this._autoRedact = value;
+    DBQuery.prototype.redact = function(level) {
+        if (level == undefined) level = 1;
+        if (!(level === 0 || level === 1 || level === 2)) throw Error("redaction level must be 0, 1 or 2");
+        this._redactionLevel = level;
         return this;
     };
 
@@ -128,7 +147,7 @@ var Redact = (function() {
         redactArray: redactArray,
         redactDoc: redactDoc,
         printRedactedDoc: printRedactedDoc,
-        setAutoRedaction: setAutoRedaction
+        setRedactionLevel: setRedactionLevel
     };
 })();
 
