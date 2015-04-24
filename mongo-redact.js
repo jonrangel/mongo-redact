@@ -78,22 +78,30 @@ var Redact = (function() {
     /*
      * Override DBCommandCursor.prototype.next() method to allow for automatic redaction.
      */
-    (function() {
-        var proxied = DBCommandCursor.prototype.next;
-        DBCommandCursor.prototype.next = function() {
-            var res = proxied.apply(this, arguments);
-            if (this._autoRedact) {
-                res = redactDoc(res);
-            }
-            return res;
-        };
-    })();
+    var re = /([0-9]+)\.([0-9]+)\.([0-9]+)/;
+    var version_match = version().match(re);
+    var major = parseInt(version_match[1]);
+    var minor = parseInt(version_match[2]);
+    if (major > 2 || (major == 2 && minor >= 6)) {
+        (function() {
+            var proxied = DBCommandCursor.prototype.next;
+            DBCommandCursor.prototype.next = function() {
+                var res = proxied.apply(this, arguments);
+                if (this._autoRedact) {
+                    res = redactDoc(res);
+                }
+                return res;
+            };
+        })();
+    }
 
     /*
      * Enable automatic redaction by default when this script is loaded.
      */
     DBQuery.prototype._autoRedact = true;
-    DBCommandCursor.prototype._autoRedact = true;
+    if (major > 2 || (major == 2 && minor >= 6)) {
+        DBCommandCursor.prototype._autoRedact = true;
+    }
 
     /*
      * Enable/disable automatic redaction globally.
@@ -101,7 +109,9 @@ var Redact = (function() {
     function setAutoRedaction(value) {
         if (value == undefined) value = true;
         DBQuery.prototype._autoRedact = value;
-        DBCommandCursor.prototype._autoRedact = value;
+        if (major > 2 || (major == 2 && minor >= 6)) {
+            DBCommandCursor.prototype._autoRedact = value;
+        }
     }
 
     /*
