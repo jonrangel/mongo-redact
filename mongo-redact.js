@@ -115,11 +115,11 @@ var Redact = (function() {
     }
 
     /*
-     * Enable automatic redaction at level 1 by default when this script is loaded.
+     * Disable automatic redaction by default when this script is loaded.
      */
-    DBQuery.prototype._redactionLevel = 1;
+    DBQuery.prototype._redactionLevel = 0;
     if (major > 2 || (major == 2 && minor >= 6)) {
-        DBCommandCursor.prototype._redactionLevel = 1;
+        DBCommandCursor.prototype._redactionLevel = 0;
     }
 
     /*
