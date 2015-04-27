@@ -134,6 +134,14 @@ var Redact = (function() {
         }
     }
 
+    function getRedactionLevel() {
+        var level = DBQuery.prototype._redactionLevel;
+        if (major > 2 || (major == 2 && minor >= 6)) {
+            assert(DBCommandCursor.prototype._redactionLevel == level);
+        }
+        return level;
+    }
+
     /*
      * Enable/disable redaction on a per query basis (for find()).
      */
@@ -149,6 +157,7 @@ var Redact = (function() {
         redactArray: redactArray,
         redactDoc: redactDoc,
         printRedactedDoc: printRedactedDoc,
-        setRedactionLevel: setRedactionLevel
+        setRedactionLevel: setRedactionLevel,
+        getRedactionLevel: getRedactionLevel
     };
 })();
