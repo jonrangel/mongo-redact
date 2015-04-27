@@ -1,15 +1,12 @@
-# redaction
-Tools for redacting data.
-
-## mongo-redact
+# mongo-redact
 A MongoDB shell script that adds data redaction capabilities to the mongo shell, providing the option to automatically remove potentially sensitive information from documents that are read out of MongoDB, while retaining the shape (_including field names_) of the data.
 
 Note: Data redaction works entirely in the shell at the 'presentation' layer.  The data read out of MongoDB and transmitted on the wire to the client is not redacted in any way.
 
-### Installation
+## Installation
 There are two ways to load the script: one-time (if you just want to test how it works) and permanent (for frequent use).
 
-#### 1. Load the script directly (one-time usage)
+### 1. Load the script directly (one-time usage)
 
 Invoke the `mongo` shell using this command:
 
@@ -19,7 +16,7 @@ mongo <basepath>/mongo-redact.js --shell
 
 It will first load `mongo-redact.js` and then open the shell as usual. Replace the `<basepath>` part with the actual path where the `mongo-redact.js` file is located.
 
-#### 2. Load the script via the `.mongorc.js` file (permanent usage)
+### 2. Load the script via the `.mongorc.js` file (permanent usage)
 
 You can also add the following line to your `~/.mongorc.js` file to always load the file on shell startup (unless started with `--norc`):
 
@@ -29,7 +26,7 @@ load('<basepath>/mongo-redact.js')
 
 Replace the `<basepath>` part with the actual path where the `mongo-redact.js` file is located.
 
-### Usage
+## Usage
 
 Three levels of redaction are provided:
 - **0** - Redaction is OFF. Data read from MongoDB is displayed normally. This is the default level (when the script is first loaded).
