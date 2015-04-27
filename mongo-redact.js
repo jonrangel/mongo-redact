@@ -75,10 +75,6 @@ var Redact = (function() {
         return doc;
     }
 
-    function printRedactedDoc(doc) {
-        printjson(redactDoc(doc));
-    }
-
     /*
      * Override DBQuery.prototype.next() method to allow for automatic redaction.
      */
@@ -156,7 +152,6 @@ var Redact = (function() {
         redactValue: redactValue,
         redactArray: redactArray,
         redactDoc: redactDoc,
-        printRedactedDoc: printRedactedDoc,
         setRedactionLevel: setRedactionLevel,
         getRedactionLevel: getRedactionLevel
     };
