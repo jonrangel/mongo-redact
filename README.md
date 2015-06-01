@@ -92,3 +92,7 @@ Redact.redactDoc(<doc>, <level>)
 ```
 
 Redact a document and return it. The `<doc>` parameter is the input document to be redacted and the (optional) `<level>` parameter specifies the redaction level (default: 1).
+
+## DISCLAIMER
+
+This software is not supported by [MongoDB, Inc.](http://www.mongodb.com) under any of their commercial support subscriptions or otherwise.  Any usage of `mongo-redact` is at your own risk.  Bug reports, feature requests and questions can be posted in the [Issues](https://github.com/jonrangel/mongo-redact/issues?state=open) section here on GitHub.
